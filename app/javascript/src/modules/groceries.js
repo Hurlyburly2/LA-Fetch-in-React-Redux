@@ -1,6 +1,7 @@
 const initialState = {
   groceryList: [],
-  name: ''
+  name: '',
+  isFetching: false
 }
 
 const groceries = (state = initialState, action) => {
@@ -12,6 +13,17 @@ const groceries = (state = initialState, action) => {
       return {...state, name: ''}
     case HANDLE_NAME_CHANGE:
       return {...state, name: action.newName}
+    case GET_GROCERIES_REQUEST:
+      return {
+        ...state,
+        isFetching: true
+      }
+    case GET_GROCERIES_REQUEST_SUCCESS:
+      return {
+        ...state,
+        groceryList: action.groceries,
+        isFetching: false
+      }
     default:
       return state
   }
@@ -44,9 +56,37 @@ const handleNameChange = event => {
   }
 }
 
+const GET_GROCERIES_REQUEST = 'GET_GROCERIES_REQUEST'
+const getGroceriesRequest = () => {
+  return {
+    type: GET_GROCERIES_REQUEST
+  }
+}
+
+const GET_GROCERIES_REQUEST_SUCCESS = 'GET_GROCERIES_REQUEST_SUCCESS'
+const getGroceriesRequestSuccess = groceries => {
+  return {
+    type: GET_GROCERIES_REQUEST_SUCCESS,
+    groceries
+  }
+}
+
+const getGroceries = () => {
+  return (dispatch) => {
+    dispatch(getGroceriesRequest())
+    
+    return fetch('/api/v1/groceries.json')
+      .then(response => response.json())
+      .then(groceries => {
+        dispatch(getGroceriesRequestSuccess(groceries))
+      })
+  }
+}
+
 export {
+  groceries,
   addNewGrocery,
   clearForm,
-  groceries,
+  getGroceries,
   handleNameChange
 }
