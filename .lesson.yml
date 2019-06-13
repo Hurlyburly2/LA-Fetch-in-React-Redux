@@ -1,0 +1,5 @@
+---
+title: "Fetch in React Redux"
+type: "article"
+description: "Implementinng fetch via asynchronous action creators in React-Redux"
+tags: "javascript, react, redux, redux-thunk, fetch"
