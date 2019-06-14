@@ -1,3 +1,5 @@
+import { displayAlertMessage } from './alertMessage.js'
+
 const initialState = {
   groceryList: [],
   name: '',
@@ -22,6 +24,11 @@ const groceries = (state = initialState, action) => {
       return {
         ...state,
         groceryList: action.groceries,
+        isFetching: false
+      }
+    case GET_GROCERIES_REQUEST_FAILURE:
+      return {
+        ...state,
         isFetching: false
       }
     default:
@@ -68,6 +75,13 @@ const getGroceriesRequestSuccess = groceries => {
   return {
     type: GET_GROCERIES_REQUEST_SUCCESS,
     groceries
+  }
+}
+
+const GET_GROCERIES_REQUEST_FAILURE = 'GET_GROCERIES_REQUEST_FAILURE'
+const getGroceriesRequestFailure = () => {
+  return {
+    type: GET_GROCERIES_REQUEST_FAILURE
   }
 }
 
