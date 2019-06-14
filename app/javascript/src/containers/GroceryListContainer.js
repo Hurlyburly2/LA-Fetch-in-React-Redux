@@ -1,11 +1,17 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
+import { getGroceries } from '../modules/groceries'
+
 import Grocery from '../components/Grocery'
 
 class GroceryListContainer extends Component {
   constructor(props) {
     super(props)
+  }
+  
+  componentDidMount() {
+    this.props.getGroceries()
   }
 
   render() {
@@ -35,7 +41,13 @@ const mapStateToProps = (state) => {
   }
 }
 
+const mapDispatchToProps = (dispatch) => {
+  return {
+    getGroceries: () => dispatch(getGroceries())
+  }
+}
+
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(GroceryListContainer)
