@@ -8,9 +8,6 @@ const initialState = {
 
 const groceries = (state = initialState, action) => {
   switch(action.type) {
-    case ADD_GROCERY:
-      const newGroceries = state.groceryList.concat(action.grocery)
-      return {...state, groceryList: newGroceries }
     case CLEAR_FORM:
       return {...state, name: ''}
     case HANDLE_NAME_CHANGE:
@@ -31,17 +28,25 @@ const groceries = (state = initialState, action) => {
         ...state,
         isFetching: false
       }
+    case POST_GROCERY_REQUEST:
+      return {
+        ...state,
+        isFetching: true
+      }
+    case POST_GROCERY_REQUEST_SUCCESS:
+      const newGroceries = state.groceryList.concat(action.grocery)
+      return {
+        ...state,
+        groceryList: newGroceries,
+        isFetching: false
+      }
+    case POST_GROCERY_REQUEST_FAILURE:
+      return {
+        ...state,
+        isFetching: false
+      }
     default:
       return state
-  }
-}
-
-const ADD_GROCERY = 'ADD_GROCERY'
-
-const addNewGrocery = grocery => {
-  return {
-    type: ADD_GROCERY,
-    grocery
   }
 }
 
@@ -94,6 +99,7 @@ const getGroceries = () => {
         if(response.ok) {
           return response.json()
         } else {
+          dispatch(getGroceriesRequestFailure())
           dispatch(displayAlertMessage("Something went wrong."))
           return { error: 'Something went wrong.' }
         }
@@ -106,10 +112,62 @@ const getGroceries = () => {
   }
 }
 
+const POST_GROCERY_REQUEST = 'POST_GROCERY_REQUEST'
+const postGroceryRequest = () => {
+  return {
+    type: POST_GROCERY_REQUEST
+  }
+}
+
+const POST_GROCERY_REQUEST_SUCCESS = 'POST_GROCERY_REQUEST_SUCCESS'
+const postGroceryRequestSuccess = grocery => {
+  return {
+    type: POST_GROCERY_REQUEST_SUCCESS,
+    grocery
+  }
+}
+
+const POST_GROCERY_REQUEST_FAILURE = 'POST_GROCERY_REQUEST_FAILURE'
+const postGroceryRequestFailure = () => {
+  return {
+    type: POST_GROCERY_REQUEST_FAILURE
+  }
+}
+
+const postGrocery = groceryData => {
+  return dispatch => {
+    dispatch(postGroceryRequest())
+    
+    return fetch(`/api/v1/groceries.json`,
+      {
+        method: 'POST',
+        body: JSON.stringify(groceryData),
+        credentials: 'same-origin',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+      }
+    )
+    .then(response => {
+      if(response.ok) {
+        return response.json()
+      } else {
+        dispatch(postGroceryRequestFailure())
+        dispatch(displayAlertMessage("Something went wrong."))
+        return { error: 'Something went wrong' }
+      }
+    })
+    .then(grocery => {
+      if (!grocery.error) {
+        dispatch(postGroceryRequestSuccess(grocery))
+      }
+    })
+  }
+}
+
 export {
   groceries,
   addNewGrocery,
   clearForm,
   getGroceries,
-  handleNameChange
+  handleNameChange,
+  postGrocery
 }
