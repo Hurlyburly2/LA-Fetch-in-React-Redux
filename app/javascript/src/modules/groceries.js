@@ -1,3 +1,5 @@
+import { displayAlertMessage } from './alertMessage.js'
+
 const initialState = {
   groceryList: [],
   name: '',
@@ -22,6 +24,11 @@ const groceries = (state = initialState, action) => {
       return {
         ...state,
         groceryList: action.groceries,
+        isFetching: false
+      }
+    case GET_GROCERIES_REQUEST_FAILURE:
+      return {
+        ...state,
         isFetching: false
       }
     default:
@@ -71,14 +78,30 @@ const getGroceriesRequestSuccess = groceries => {
   }
 }
 
+const GET_GROCERIES_REQUEST_FAILURE = 'GET_GROCERIES_REQUEST_FAILURE'
+const getGroceriesRequestFailure = () => {
+  return {
+    type: GET_GROCERIES_REQUEST_FAILURE
+  }
+}
+
 const getGroceries = () => {
   return (dispatch) => {
     dispatch(getGroceriesRequest())
     
     return fetch('/api/v1/groceries.json')
-      .then(response => response.json())
+      .then(response => {
+        if(response.ok) {
+          return response.json()
+        } else {
+          dispatch(displayAlertMessage("Something went wrong."))
+          return { error: 'Something went wrong.' }
+        }
+      })
       .then(groceries => {
-        dispatch(getGroceriesRequestSuccess(groceries))
+        if (!groceries.error) {
+          dispatch(getGroceriesRequestSuccess(groceries))
+        }
       })
   }
 }
