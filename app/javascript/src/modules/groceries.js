@@ -8,9 +8,6 @@ const initialState = {
 
 const groceries = (state = initialState, action) => {
   switch(action.type) {
-    // case ADD_GROCERY:
-    //   const newGroceries = state.groceryList.concat(action.grocery)
-    //   return {...state, groceryList: newGroceries }
     case CLEAR_FORM:
       return {...state, name: ''}
     case HANDLE_NAME_CHANGE:
@@ -52,15 +49,6 @@ const groceries = (state = initialState, action) => {
       return state
   }
 }
-
-// const ADD_GROCERY = 'ADD_GROCERY'
-// 
-// const addNewGrocery = grocery => {
-//   return {
-//     type: ADD_GROCERY,
-//     grocery
-//   }
-// }
 
 const CLEAR_FORM = 'CLEAR_FORM'
 
@@ -146,10 +134,38 @@ const postGroceryRequestFailure = () => {
   }
 }
 
+const postGrocery = groceryData => {
+  return dispatch => {
+    dispatch(postGroceryRequest())
+    
+    return fetch(`/api/v1/groceries.json`,
+      method: 'POST',
+      body: JSON.stringify(groceryData),
+      credentials: 'same-origin',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+    )
+    .then(response => {
+      if(response.ok) {
+        return response.json()
+      } else {
+        dispatch(postGroceryRequestFailure())
+        dispatch(displayAlertMessage("Something went wrong."))
+        return { error: 'Something went wrong' }
+      }
+    })
+    .then(grocery => {
+      if (!grocery.error) {
+        dispatch(postGroceryRequestSuccess(grocery))
+      }
+    })
+  }
+}
+
 export {
   groceries,
   addNewGrocery,
   clearForm,
   getGroceries,
-  handleNameChange
+  handleNameChange,
+  postGrocery
 }
