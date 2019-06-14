@@ -76,9 +76,18 @@ const getGroceries = () => {
     dispatch(getGroceriesRequest())
     
     return fetch('/api/v1/groceries.json')
-      .then(response => response.json())
+      .then(response => {
+        if(response.ok) {
+          return response.json()
+        } else {
+          dispatch(displayAlertMessage("Something went wrong."))
+          return { error: 'Something went wrong.' }
+        }
+      })
       .then(groceries => {
-        dispatch(getGroceriesRequestSuccess(groceries))
+        if (!groceries.error) {
+          dispatch(getGroceriesRequestSuccess(groceries))
+        }
       })
   }
 }
